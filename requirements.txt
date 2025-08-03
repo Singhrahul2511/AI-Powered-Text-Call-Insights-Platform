@@ -1,0 +1,17 @@
+streamlit
+pandas
+plotly
+spacy>=3.0.0,<4.0.0
+textblob
+vaderSentiment
+gensim
+scikit-learn
+openpyxl
+pyarrow
+openai-whisper
+ffmpeg-python
+
+# Added missing packages
+wordcloud
+transformers
+torch

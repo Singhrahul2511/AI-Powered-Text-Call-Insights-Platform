@@ -1,0 +1,18 @@
+# Ignore the Python virtual environment folder
+rahul/
+
+# Ignore other common Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv
+env/
+venv/
+ENV/
+VENV/
+
+# Ignore IDE/editor-specific files
+.vscode/
+.idea/
