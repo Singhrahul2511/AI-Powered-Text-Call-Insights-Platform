@@ -10,9 +10,10 @@ openpyxl==3.1.2
 pyarrow==15.0.0
 ffmpeg-python==0.2.0
 wordcloud==1.9.3
+
 torch==2.1.2
 transformers==4.35.2
 openai-whisper==20231117
 
-# Declare the spaCy model as a direct dependency for cloud deployment.
-en-core-web-sm @ https://www.google.com/search?q=https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz
+
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz
