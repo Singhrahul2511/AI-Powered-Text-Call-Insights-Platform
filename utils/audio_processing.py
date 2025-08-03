@@ -4,37 +4,37 @@ import whisper
 import streamlit as st
 from transformers import pipeline
 import re
+import shutil # Import the shutil library to check for executables
 
 @st.cache_resource
 def load_whisper_model():
-    # Using .cache_resource to ensure the model is loaded only once
     return whisper.load_model("base")
 
 @st.cache_resource
 def load_summarizer():
-    # Using .cache_resource for the summarization pipeline
     return pipeline("summarization", model="facebook/bart-large-cnn")
 
 def transcribe_audio(file_path):
     """
     Transcribes an audio file using OpenAI's Whisper model.
-    Accepts a file path string.
+    Includes a definitive check for FFmpeg's existence.
     """
-    try:
-        model = load_whisper_model()
-        # The model's transcribe function expects a file path string.
-        result = model.transcribe(file_path, fp16=False) # Set fp16=False for CPU
-        return result["text"]
-    except FileNotFoundError:
-        # **FIX:** Catch the specific FileNotFoundError and provide a helpful message.
-        # This is a common issue on local Windows machines if FFmpeg is not installed.
+    # **FIX:** Add a definitive check to see if ffmpeg is in the system's PATH.
+    # This will confirm if the installation via packages.txt was successful and made available to the app.
+    if not shutil.which("ffmpeg"):
         st.error(
-            "Transcription Error: FFmpeg not found. "
-            "Whisper requires FFmpeg to process audio files. Please ensure FFmpeg is installed on your system and accessible in your PATH. "
-            "You can download it from https://ffmpeg.org/download.html"
+            "FATAL: FFmpeg is not installed or not in the system's PATH. "
+            "Even though packages.txt exists, the Streamlit Cloud environment has failed to make FFmpeg available. "
+            "Please try rebooting the app one more time. If the error persists, please contact Streamlit support as this indicates a platform-level issue."
         )
         return None
+
+    try:
+        model = load_whisper_model()
+        result = model.transcribe(file_path, fp16=False) # Set fp16=False for CPU
+        return result["text"]
     except Exception as e:
+        # This will now catch other potential errors from whisper itself.
         st.error(f"An unexpected error occurred during transcription: {e}")
         return None
 
@@ -53,7 +53,6 @@ def summarize_text(text):
 def calculate_talk_to_listen_ratio(transcription):
     """
     A simplified implementation to calculate the talk-to-listen ratio.
-    A real-world scenario would require speaker diarization.
     """
     agent_keywords = ['i', 'me', 'my', 'we', 'our', 'us', 'company']
     words = re.findall(r'\b\w+\b', transcription.lower())
