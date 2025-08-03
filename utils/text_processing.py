@@ -11,30 +11,26 @@ import plotly.express as px
 import streamlit as st
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
-import subprocess
-import sys
 
-def check_and_download_spacy_model(model="en_core_web_sm"):
-    if not spacy.util.is_package(model):
-        with st.spinner(f"Downloading spaCy model '{model}'..."):
-            try:
-                subprocess.check_call([sys.executable, "-m", "spacy", "download", model])
-                st.success(f"Successfully downloaded '{model}'. Please refresh the page.")
-                st.stop()
-            except Exception as e:
-                st.error(f"Failed to download spaCy model: {e}")
-                st.stop()
-
-check_and_download_spacy_model()
-
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    st.error("Could not load spaCy model. Please ensure it is installed.")
-    st.stop()
+# **FIX:** Implement lazy loading for the spaCy model to conserve memory.
+# The model is only loaded into memory when a function that needs it is called.
+@st.cache_resource
+def load_spacy_model():
+    """Loads the spaCy model and caches it using Streamlit's resource caching."""
+    try:
+        return spacy.load("en_core_web_sm")
+    except OSError:
+        st.error(
+            "spaCy model not found. This app requires the 'en_core_web_sm' model. "
+            "It should be installed automatically from requirements.txt. "
+            "If you're running locally, please run: `python -m spacy download en_core_web_sm`"
+        )
+        st.stop()
 
 @st.cache_data
 def preprocess_text(text):
+    """Preprocesses text by loading the spaCy model on demand."""
+    nlp = load_spacy_model() # Load the model only when this function is called
     if not isinstance(text, str):
         return []
     doc = nlp(text.lower())
@@ -43,7 +39,8 @@ def preprocess_text(text):
 def get_sentiment_textblob(text):
     if not isinstance(text, str):
         return 0.0, 0.0
-    return TextBlob(text).sentiment
+    sentiment = TextBlob(text).sentiment
+    return sentiment.polarity, sentiment.subjectivity
 
 def get_sentiment_vader(text):
     if not isinstance(text, str):
@@ -103,7 +100,13 @@ def plot_topic_distribution(df_doc_topics):
     return fig
 
 def create_wordcloud(series):
-    text = " ".join(review for review in series)
+    text = " ".join(review for review in series if isinstance(review, str) and review)
+    if not text:
+        fig, ax = plt.subplots()
+        ax.text(0.5, 0.5, 'No text to generate a word cloud.', ha='center', va='center')
+        ax.axis("off")
+        return fig
+        
     wordcloud = WordCloud(background_color="white", max_words=100, contour_width=3, contour_color='steelblue').generate(text)
     fig, ax = plt.subplots()
     ax.imshow(wordcloud, interpolation='bilinear')
