@@ -172,6 +172,6 @@ Deploy: Link your GitHub repository and deploy. The deployment will automaticall
 Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
 
 📧 Contact
-Rahul Singh - Your LinkedIn Profile URL - rahulkumarpatelbr.@gmail.com
+Rahul Singh - Your LinkedIn Profile URL - https://www.linkedin.com/in/rahul-kumar-8ab740268/
 
 Project Link: https://github.com/Singhrahul2511/AI-Powered-Text-Call-Insights-Platform
